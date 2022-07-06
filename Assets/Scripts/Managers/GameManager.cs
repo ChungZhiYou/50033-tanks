@@ -99,18 +99,19 @@ public class GameManager : MonoBehaviour
             {
                 timer.text = "0:0" + time_left.ToString();
             }
-            StartCoroutine(Seconds());
+            // StartCoroutine(Seconds());
+            time_left-=1;
             yield return new WaitForSeconds(1);
         }
         timeout = true;
         yield return null;
     }
 
-    private IEnumerator Seconds()
-    {   
-        time_left-=1;
-        yield return null;
-    }
+    // private IEnumerator Seconds()
+    // {   
+    //     time_left-=1;
+    //     yield return null;
+    // }
 
     public void onClicked(){
 
@@ -125,8 +126,11 @@ public class GameManager : MonoBehaviour
     {   
         roundsToWinInt = Convert.ToInt32(roundsToWin.text.ToString());
         timePerRoundInt = Convert.ToInt32(timePerRound.text.ToString());
+        
         if (roundsToWinInt > 10){
             roundsToWinInt = 10;
+        } else if (roundsToWinInt < 1){
+            roundsToWinInt = 1;
         }
 
         m_NumRoundsToWin = roundsToWinInt;

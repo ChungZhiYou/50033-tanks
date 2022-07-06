@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System;
 
 
 public class GameManager : MonoBehaviour
@@ -11,7 +12,8 @@ public class GameManager : MonoBehaviour
     public int m_NumRoundsToWin = 5;            
     public float m_StartDelay = 3f;             
     public float m_EndDelay = 3f;               
-    public CameraControl m_CameraControl;       
+    public CameraControl m_CameraControl;
+    public Text timer;       
     public Text m_MessageText;                  
     public GameObject[] m_TankPrefabs;
     public TankManager[] m_Tanks;               
@@ -23,16 +25,27 @@ public class GameManager : MonoBehaviour
     private TankManager m_RoundWinner;          
     private TankManager m_GameWinner;           
 
+    public bool timeout = false;
+    public bool ready = false;
+    private int time_left;
+
+    private int roundsToWinInt;
+    private int timePerRoundInt;
+
+    public GameObject startButton;
+    public GameObject roundsToWinObj;
+    public GameObject timePerRoundObj;
+    public GameObject roundsToWinText;
+    public GameObject timePerRoundText;
+    public Text roundsToWin;
+    public Text timePerRound;
+    
 
     private void Start()
     {
+
         m_StartWait = new WaitForSeconds(m_StartDelay);
         m_EndWait = new WaitForSeconds(m_EndDelay);
-
-        SpawnAllTanks();
-        SetCameraTargets();
-
-        StartCoroutine(GameLoop());
     }
 
 
@@ -67,6 +80,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator GameLoop()
     {
         yield return StartCoroutine(RoundStarting());
+        StartCoroutine(TimeOut());
         yield return StartCoroutine(RoundPlaying());
         yield return StartCoroutine(RoundEnding());
 
@@ -74,9 +88,73 @@ public class GameManager : MonoBehaviour
         else StartCoroutine(GameLoop());
     }
 
+    private IEnumerator TimeOut()
+    {
+        time_left = timePerRoundInt;
+        while (time_left != -1 && !OneTankLeft()){
+            if (time_left >= 10 )
+            {
+                timer.text = "0:" + time_left.ToString();
+            }else
+            {
+                timer.text = "0:0" + time_left.ToString();
+            }
+            StartCoroutine(Seconds());
+            yield return new WaitForSeconds(1);
+        }
+        timeout = true;
+        yield return null;
+    }
+
+    private IEnumerator Seconds()
+    {   
+        time_left-=1;
+        yield return null;
+    }
+
+    public void onClicked(){
+
+        SpawnAllTanks();
+        SetCameraTargets();
+        StartCoroutine(MenuSettings());
+
+        StartCoroutine(GameLoop());
+    }
+    
+    private IEnumerator MenuSettings()
+    {   
+        roundsToWinInt = Convert.ToInt32(roundsToWin.text.ToString());
+        timePerRoundInt = Convert.ToInt32(timePerRound.text.ToString());
+        if (roundsToWinInt > 10){
+            roundsToWinInt = 10;
+        }
+
+        m_NumRoundsToWin = roundsToWinInt;
+
+        if (timePerRoundInt >= 60){
+            timePerRoundInt = 59;
+        }
+        else if(timePerRoundInt < 10){
+            timePerRoundInt = 10;
+        }
+
+        time_left = timePerRoundInt;
+
+        roundsToWinObj.SetActive(false);
+        timePerRoundObj.SetActive(false);
+        startButton.SetActive(false);
+        roundsToWinText.SetActive(false);
+        timePerRoundText.SetActive(false);
+
+        yield return null;
+
+    }
+
 
     private IEnumerator RoundStarting()
     {
+        timeout = false;
+        timer.text = timePerRoundInt.ToString();
         ResetAllTanks();
         DisableTankControl();
 
@@ -95,7 +173,7 @@ public class GameManager : MonoBehaviour
 
         m_MessageText.text = string.Empty;
 
-        while (!OneTankLeft()) yield return null;
+        while (!OneTankLeft() && !timeout) yield return null;
     }
 
 
@@ -112,6 +190,7 @@ public class GameManager : MonoBehaviour
 
         string message = EndMessage();
         m_MessageText.text = message;
+        timeout = false;
 
         yield return m_EndWait;
     }
@@ -131,6 +210,11 @@ public class GameManager : MonoBehaviour
 
     private TankManager GetRoundWinner()
     {
+        if (timeout)
+        {
+            return null;
+        }
+
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             if (m_Tanks[i].m_Instance.activeSelf)

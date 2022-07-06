@@ -1,11 +1,18 @@
 fileFormatVersion: 2
 guid: f466f3abe3e05624f832a34ce37a49c7
-timeCreated: 1508180097
-licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - currentState: {instanceID: 0}
+  - enemyStats: {instanceID: 0}
+  - eyes: {instanceID: 0}
+  - m_FireTransform: {instanceID: 0}
+  - remainState: {instanceID: 0}
+  - alert: {instanceID: 0}
+  - navMeshAgent: {instanceID: 0}
+  - tankShooting: {instanceID: 0}
+  - chaseTarget: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
